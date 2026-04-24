@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoBank | High Net Worth Wallet</title>
+    
+    <style>
+        :root {
+            --primary-blue: #4f46e5;
+            --success-green: #22c55e;
+            --danger-red: #ef4444;
+            --dark-text: #1f2937;
+            --light-bg: #f9fafb;
+        }
+            
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #e5e7eb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .wallet-card {
+            background: white;
+            width: 100%;
+            max-width: 450px;
+            padding: 2rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .header { text-align: center; margin-bottom: 1.5rem; }
+        .header h1 { color: var(--primary-blue); margin: 0; font-size: 1.8rem; }
+        
+        .balance-container {
+            background: linear-gradient(135deg, #1e1b4b, var(--primary-blue));
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        /* Adjusted font size for 10 Crore display */
+        #balance-amount { font-size: 2rem; margin: 0.5rem 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; }
+
+        .section-title { font-size: 0.9rem; color: #6b7280; text-transform: uppercase; margin-bottom: 10px; font-weight: 600; }
+        
+        .grid-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+        
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            background: #f3f4f6;
+            color: var(--dark-text);
+        }
+
+        button:hover { background: #e5e7eb; transform: translateY(-2px); }
+
+        .withdraw-container { display: flex; gap: 10px; }
+        
+        input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .withdraw-btn { background: var(--danger-red); color: white; }
+
+        .message {
+            height: 20px;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .history {
+            margin-top: 1.5rem;
+            border-top: 1px solid #eee;
+            padding-top: 1rem;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            padding: 5px 0;
+            border-bottom: 1px solid #f9fafb;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wallet-card">
+        <div class="header">
+            <h1>NeoBank <small style="font-size: 0.5em; vertical-align: middle;">ELITE</small></h1>
+        </div>
+
+        <div class="balance-container">
+            <p>Total Wealth</p>
+            <h2 id="balance-amount">₹0</h2>
+        </div>
+
+        <p class="section-title">Quick Deposit</p>
+        <div class="grid-buttons">
+            <button onclick="updateBalance(500)">+ 500</button>
+            <button onclick="updateBalance(1000)">+ 1000</button>
+            <button onclick="updateBalance(2000)">+ 2000</button>
+        </div>
+
+        <p class="section-title">Withdrawal</p>
+        <div class="withdraw-container">
+            <input type="number" id="withdraw-amount" placeholder="Enter amount">
+            <button class="withdraw-btn" onclick="handleWithdraw()">Withdraw</button>
+        </div>
+
+        <div id="status-msg" class="message"></div>
+
+        <p class="section-title" style="margin-top: 20px;">Recent Activity</p>
+        <div id="transaction-list" class="history">
+            <p style="color: #999; font-size: 0.8rem; text-align: center;">Initial balance loaded...</p>
+        </div>
+    </div>
+
+    <script>
+        // Start with 10 Crore (10,00,00,000)
+        let currentBalance = 100000000; 
+
+        const balanceDisplay = document.getElementById('balance-amount');
+        const withdrawInput = document.getElementById('withdraw-amount');
+        const statusMsg = document.getElementById('status-msg');
+        const historyList = document.getElementById('transaction-list');
+
+        // Initial render to show the 10 Crore immediately
+        window.onload = () => {
+            renderUI("Welcome, Elite User", "success");
+        };
+
+        function updateBalance(amount) {
+            currentBalance += amount;
+            renderUI(`Deposited ₹${amount.toLocaleString('en-IN')}`, "success");
+        }
+
+        function handleWithdraw() {
+            const amount = parseFloat(withdrawInput.value);
+
+            if (isNaN(amount) || amount <= 0) {
+                renderUI("Invalid amount entered", "error");
+                return;
+            }
+
+            if (amount > currentBalance) {
+                renderUI("Insufficient Balance!", "error");
+            } else {
+                currentBalance -= amount;
+                renderUI(`Withdrew ₹${amount.toLocaleString('en-IN')}`, "success");
+                withdrawInput.value = ""; 
+            }
+        }
+
+        function renderUI(message, type) {
+            // Using en-IN locale for Indian Rupee comma formatting (e.g. 10,00,00,000)
+            balanceDisplay.textContent = `₹${currentBalance.toLocaleString('en-IN')}`;
+
+            statusMsg.textContent = message;
+            statusMsg.style.color = type === "error" ? "#ef4444" : "#22c55e";
+
+            if (type === "success" && !message.includes("Welcome")) {
+                addHistory(message);
+            }
+        }
+
+        function addHistory(action) {
+            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `<span>${action}</span><span style="color:#999">${now}</span>`;
+            
+            if (historyList.children[0] && historyList.children[0].tagName === 'P') {
+                historyList.innerHTML = '';
+            }
+            historyList.prepend(item);
+        }
+    </script>
+</body>
+</html>
